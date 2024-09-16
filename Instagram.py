@@ -1,22 +1,37 @@
 import pandas as pd
 
 # Load the dataset
-data = pd.read_csv(r"F:/guvi/influencer.csv")
+df = pd.read_csv(r"F:/guvi/influencer.csv")
 
-# Function to convert shorthand notation to numeric
-def convert_shorthand_to_numeric(value):
+# Strip whitespace from the 'Channel Info' column
+df['Channel Info'] = df['Channel Info'].str.strip()
+
+# Save the cleaned DataFrame back to a CSV file
+# df.to_csv('cleaned_file.csv', index=False)
+
+def convert_shorthand(value):
     if isinstance(value, str):
-        if 'm' in value:
-            return float(value.replace('m', '')) * 1e6
-        elif 'k' in value:
-            return float(value.replace('k', '')) * 1e3
-        elif 'b' in value:
-            return float(value.replace('b', '')) * 1e9
+        value = value.lower().replace(',', '')  # Normalize the string
+        if value.endswith('k'):
+            return float(value[:-1]) * 1_000
+        elif value.endswith('m'):
+            return float(value[:-1]) * 1_000_000
+        elif value.endswith('b'):
+            return float(value[:-1]) * 1_000_000_000
+        else:
+            try:
+                return float(value)
+            except ValueError:
+                return None  # or handle the error as needed
     return value
 
-# Apply this function to relevant columns
-data['Followers'] = data['Followers'].apply(convert_shorthand_to_numeric)
-data['Avg. Likes'] = data['Avg. Likes'].apply(convert_shorthand_to_numeric)
-data['Posts'] = data['Posts'].apply(convert_shorthand_to_numeric)
-data['Total Likes'] = data['Total Likes'].apply(convert_shorthand_to_numeric)
+
+df['Followers'] = df['Followers'].apply(convert_shorthand)
+df['Avg. Likes'] = df['Avg. Likes'].apply(convert_shorthand)
+df['Posts'] = df['Posts'].apply(convert_shorthand)
+df['New Post Avg. Likes'] = df['New Post Avg. Likes'].apply(convert_shorthand)
+df['Total Likes'] = df['Total Likes'].apply(convert_shorthand)
+
+df.to_csv('cleaned_numeric_file.csv', index=False)
+
 
