@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Load the dataset
 df = pd.read_csv(r"F:/guvi/influencer.csv")
@@ -32,12 +34,15 @@ df['Posts'] = df['Posts'].apply(convert_shorthand)
 df['New Post Avg. Likes'] = df['New Post Avg. Likes'].apply(convert_shorthand)
 df['Total Likes'] = df['Total Likes'].apply(convert_shorthand)
 
-df.to_csv('cleaned_numeric_file.csv', index=False)
+# df.to_csv('cleaned_numeric_file.csv', index=False)
 
 #######################
 
+# Select only numeric columns for correlation calculation
+numeric_df = df.select_dtypes(include=['number'])
+
 # Compute the correlation matrix
-correlation_matrix = df.corr()
+correlation_matrix = numeric_df.corr()
 
 # Find the absolute values of the correlation matrix
 abs_corr_matrix = correlation_matrix.abs()
@@ -52,5 +57,23 @@ max_corr_value = abs_corr_matrix.stack().max()
 
 print(f"Most highly correlated pair: {max_corr}")
 print(f"Correlation coefficient: {max_corr_value}")
+
+
+# Plotting the scatter plot for the most highly correlated pair
+plt.figure(figsize=(10, 5))
+
+plt.subplot(1, 2, 1)
+sns.scatterplot(x='Avg. Likes', y='New Post Avg. Likes', data=df)
+plt.title('Scatter Plot of Avg. Likes vs. New Post Avg. Likes')
+plt.xlabel('Avg. Likes')
+plt.ylabel('New Post Avg. Likes')
+
+# Plotting the heatmap of the correlation matrix
+plt.subplot(1, 2, 2)
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+plt.title('Correlation Heatmap')
+
+plt.tight_layout()
+plt.show()
 
 #########################
