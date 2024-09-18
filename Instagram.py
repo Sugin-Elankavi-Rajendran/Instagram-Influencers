@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from path import location
 
 # Load the dataset
-df = pd.read_csv(r"F:/guvi/influencer.csv")
+df = pd.read_csv(location)
 
 # Strip whitespace from the 'Channel Info' column
 df['Channel Info'] = df['Channel Info'].str.strip()
