@@ -77,3 +77,21 @@ plt.tight_layout()
 plt.show()
 
 #########################
+
+# Frequency distribution for Influence Score
+plt.hist(numeric_df['Influence Score'], bins=20)
+plt.title('Influence Score Distribution')
+plt.show()
+
+# Frequency distribution for Followers
+plt.hist(numeric_df['Followers'], bins=20)
+plt.title('Followers Distribution')
+plt.show()
+
+# Frequency distribution for Posts
+plt.hist(numeric_df['Posts'], bins=20)
+plt.title('Posts Distribution')
+plt.show()
+
+########################################
+
