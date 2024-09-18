@@ -106,3 +106,18 @@ plt.ylabel('Count')
 plt.show()
 
 ##########################################
+
+# Top 10 by Followers
+top_followers = df.nlargest(10, 'Followers')
+
+# Top 10 by Average Likes
+top_avg_likes = df.nlargest(10, 'Avg. Likes')
+
+# Top 10 by Total Likes
+top_total_likes = df.nlargest(10, 'Total Likes')
+
+print("Top 10 by Followers:\n", top_followers)
+print("Top 10 by Average Likes:\n", top_avg_likes)
+print("Top 10 by Total Likes:\n", top_total_likes)
+
+##############################################
