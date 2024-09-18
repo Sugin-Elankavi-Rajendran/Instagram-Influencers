@@ -121,3 +121,33 @@ print("Top 10 by Average Likes:\n", top_avg_likes)
 print("Top 10 by Total Likes:\n", top_total_likes)
 
 ##############################################
+
+# Followers vs Total Likes
+plt.scatter(df['Followers'], df['Total Likes'])
+plt.title('Followers vs Total Likes')
+plt.xlabel('Followers')
+plt.ylabel('Total Likes')
+plt.show()
+
+# Followers vs Influence Score
+plt.scatter(df['Followers'], df['Influence Score'])
+plt.title('Followers vs Influence Score')
+plt.xlabel('Followers')
+plt.ylabel('Influence Score')
+plt.show()
+
+# Posts vs Avg. Likes
+plt.scatter(df['Posts'], df['Avg. Likes'])
+plt.title('Posts vs Avg. Likes')
+plt.xlabel('Posts')
+plt.ylabel('Avg. Likes')
+plt.show()
+
+# Posts vs Influence Score
+plt.scatter(df['Posts'], df['Influence Score'])
+plt.title('Posts vs Influence Score')
+plt.xlabel('Posts')
+plt.ylabel('Influence Score')
+plt.show()
+
+#########################################
