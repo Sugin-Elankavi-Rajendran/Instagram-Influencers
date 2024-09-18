@@ -13,6 +13,9 @@ df['Channel Info'] = df['Channel Info'].str.strip()
 # df.to_csv('cleaned_file.csv', index=False)
 
 def convert_shorthand(value):
+    """
+    Convert shorthand notations like 'k', 'm', 'b' to their numeric equivalents.
+    """
     if isinstance(value, str):
         value = value.lower().replace(',', '')  # Normalize the string
         if value.endswith('k'):
@@ -28,13 +31,14 @@ def convert_shorthand(value):
                 return None  # or handle the error as needed
     return value
 
-
+# Apply the conversion function to relevant columns
 df['Followers'] = df['Followers'].apply(convert_shorthand)
 df['Avg. Likes'] = df['Avg. Likes'].apply(convert_shorthand)
 df['Posts'] = df['Posts'].apply(convert_shorthand)
 df['New Post Avg. Likes'] = df['New Post Avg. Likes'].apply(convert_shorthand)
 df['Total Likes'] = df['Total Likes'].apply(convert_shorthand)
 
+# Save the cleaned numeric DataFrame back to a CSV file
 # df.to_csv('cleaned_numeric_file.csv', index=False)
 
 #######################
@@ -48,7 +52,6 @@ correlation_matrix = numeric_df.corr()
 # Find the absolute values of the correlation matrix
 abs_corr_matrix = correlation_matrix.abs()
 
-# Find the pairs with the highest correlation
 # Remove self-correlation (correlation of a feature with itself) by setting those to NaN
 abs_corr_matrix = abs_corr_matrix.where(~abs_corr_matrix.eq(1))
 
@@ -58,7 +61,6 @@ max_corr_value = abs_corr_matrix.stack().max()
 
 print(f"Most highly correlated pair: {max_corr}")
 print(f"Correlation coefficient: {max_corr_value}")
-
 
 # Plotting the scatter plot for the most highly correlated pair
 plt.figure(figsize=(10, 5))
