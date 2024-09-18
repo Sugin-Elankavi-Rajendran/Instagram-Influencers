@@ -1,172 +1,170 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from path import location
+import streamlit as st
 
-# Load the dataset
-df = pd.read_csv(location)
+# Streamlit title
+st.title('Instagram Influencer Data Analysis')
 
-# Strip whitespace from the 'Channel Info' column
-df['Channel Info'] = df['Channel Info'].str.strip()
+# Upload the dataset
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
-# Save the cleaned DataFrame back to a CSV file
-# df.to_csv('cleaned_file.csv', index=False)
+if uploaded_file is not None:
+    # Load the dataset
+    df = pd.read_csv(uploaded_file)
 
-def convert_shorthand(value):
-    """
-    Convert shorthand notations like 'k', 'm', 'b' to their numeric equivalents.
-    """
-    if isinstance(value, str):
-        value = value.lower().replace(',', '')  # Normalize the string
-        if value.endswith('k'):
-            return float(value[:-1]) * 1_000
-        elif value.endswith('m'):
-            return float(value[:-1]) * 1_000_000
-        elif value.endswith('b'):
-            return float(value[:-1]) * 1_000_000_000
-        else:
-            try:
-                return float(value)
-            except ValueError:
-                return None  # or handle the error as needed
-    return value
+    # Strip whitespace from the 'Channel Info' column
+    df['Channel Info'] = df['Channel Info'].str.strip()
 
-# Apply the conversion function to relevant columns
-df['Followers'] = df['Followers'].apply(convert_shorthand)
-df['Avg. Likes'] = df['Avg. Likes'].apply(convert_shorthand)
-df['Posts'] = df['Posts'].apply(convert_shorthand)
-df['New Post Avg. Likes'] = df['New Post Avg. Likes'].apply(convert_shorthand)
-df['Total Likes'] = df['Total Likes'].apply(convert_shorthand)
+    # Conversion function
+    def convert_shorthand(value):
+        if isinstance(value, str):
+            value = value.lower().replace(',', '')  # Normalize the string
+            if value.endswith('k'):
+                return float(value[:-1]) * 1_000
+            elif value.endswith('m'):
+                return float(value[:-1]) * 1_000_000
+            elif value.endswith('b'):
+                return float(value[:-1]) * 1_000_000_000
+            else:
+                try:
+                    return float(value)
+                except ValueError:
+                    return None
+        return value
 
-# Save the cleaned numeric DataFrame back to a CSV file
-# df.to_csv('cleaned_numeric_file.csv', index=False)
+    # Apply conversion
+    df['Followers'] = df['Followers'].apply(convert_shorthand)
+    df['Avg. Likes'] = df['Avg. Likes'].apply(convert_shorthand)
+    df['Posts'] = df['Posts'].apply(convert_shorthand)
+    df['New Post Avg. Likes'] = df['New Post Avg. Likes'].apply(convert_shorthand)
+    df['Total Likes'] = df['Total Likes'].apply(convert_shorthand)
 
-#######################
+    # Show the first few rows of the dataset
+    st.subheader("Dataset Preview")
+    st.dataframe(df.head())
 
-# Select only numeric columns for correlation calculation
-numeric_df = df.select_dtypes(include=['number'])
+    #######################
+    # Correlation Matrix
+    st.subheader("Correlation Analysis")
 
-# Compute the correlation matrix
-correlation_matrix = numeric_df.corr()
+    # Select only numeric columns for correlation calculation
+    numeric_df = df.select_dtypes(include=['number'])
 
-# Find the absolute values of the correlation matrix
-abs_corr_matrix = correlation_matrix.abs()
+    # Compute the correlation matrix
+    correlation_matrix = numeric_df.corr()
 
-# Remove self-correlation (correlation of a feature with itself) by setting those to NaN
-abs_corr_matrix = abs_corr_matrix.where(~abs_corr_matrix.eq(1))
+    # Display the correlation matrix as a heatmap
+    st.write("Correlation Heatmap:")
+    plt.figure(figsize=(10, 5))
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+    st.pyplot(plt)
 
-# Find the index of the maximum value in the correlation matrix
-max_corr = abs_corr_matrix.stack().idxmax()
-max_corr_value = abs_corr_matrix.stack().max()
+    # Find the absolute values of the correlation matrix
+    abs_corr_matrix = correlation_matrix.abs()
 
-print(f"Most highly correlated pair: {max_corr}")
-print(f"Correlation coefficient: {max_corr_value}")
+    # Remove self-correlation by setting those to NaN
+    abs_corr_matrix = abs_corr_matrix.where(~abs_corr_matrix.eq(1))
 
-# Plotting the scatter plot for the most highly correlated pair
-plt.figure(figsize=(10, 5))
+    # Find the index of the maximum value in the correlation matrix
+    max_corr = abs_corr_matrix.stack().idxmax()
+    max_corr_value = abs_corr_matrix.stack().max()
 
-plt.subplot(1, 2, 1)
-sns.scatterplot(x='Avg. Likes', y='New Post Avg. Likes', data=df)
-plt.title('Scatter Plot of Avg. Likes vs. New Post Avg. Likes')
-plt.xlabel('Avg. Likes')
-plt.ylabel('New Post Avg. Likes')
+    st.write(f"Most highly correlated pair: {max_corr}")
+    st.write(f"Correlation coefficient: {max_corr_value}")
 
-# Plotting the heatmap of the correlation matrix
-plt.subplot(1, 2, 2)
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
-plt.title('Correlation Heatmap')
+    #########################
+    # Frequency distribution for various columns
+    st.subheader("Frequency Distributions")
 
-plt.tight_layout()
-plt.show()
+    # Influence Score Distribution
+    st.write("Influence Score Distribution")
+    plt.figure(figsize=(10, 5))
+    sns.histplot(numeric_df['Influence Score'], bins=20, kde=True)
+    plt.title('Influence Score Distribution with Density Curve')
+    st.pyplot(plt)
 
-#########################
+    # Followers Distribution
+    st.write("Followers Distribution")
+    plt.figure(figsize=(10, 5))
+    sns.histplot(numeric_df['Followers'], bins=20, kde=True)
+    plt.title('Followers Distribution with Density Curve')
+    st.pyplot(plt)
 
-# Frequency distribution for Influence Score
-plt.hist(numeric_df['Influence Score'], bins=20)
-plt.title('Influence Score Distribution')
-plt.show()
+    # Posts Distribution
+    st.write("Posts Distribution")
+    plt.figure(figsize=(10, 5))
+    sns.histplot(numeric_df['Posts'], bins=20, kde=True)
+    plt.title('Posts Distribution with Density Curve')
+    st.pyplot(plt)
 
-# Frequency distribution for Followers
-plt.hist(numeric_df['Followers'], bins=20)
-plt.title('Followers Distribution')
-plt.show()
+    #########################
+    # Count of influencers per country
+    st.subheader("Count of Instagram Influencers by Country")
+    country_counts = df['Country Or Region'].value_counts()
 
-# Frequency distribution for Posts
-plt.hist(numeric_df['Posts'], bins=20)
-plt.title('Posts Distribution')
-plt.show()
+    # Display country counts as a bar chart
+    st.bar_chart(country_counts)
 
-########################################
+    ##########################################
+    # Normalize the values for Combined Score calculation
+    df['Followers_Norm'] = df['Followers'] / df['Followers'].max()
+    df['Avg_Likes_Norm'] = df['Avg. Likes'] / df['Avg. Likes'].max()
+    df['Total_Likes_Norm'] = df['Total Likes'] / df['Total Likes'].max()
 
-# Count of influencers per country
-country_counts = df['Country Or Region'].value_counts()
+    # Create a combined score (simple average of the normalized features)
+    df['Combined_Score'] = (df['Followers_Norm'] + df['Avg_Likes_Norm'] + df['Total_Likes_Norm']) / 3
 
-# Plot the bar chart
-country_counts.plot(kind='bar')
-plt.title('Count of Instagram Influencers by Country')
-plt.xlabel('Country')
-plt.ylabel('Count')
-plt.show()
+    # Get the top 10 influencers based on the combined score
+    st.subheader("Top 10 Influencers by Combined Score")
+    top_10_influencers = df.nlargest(10, 'Combined_Score')
+    st.dataframe(top_10_influencers[['Channel Info', 'Followers', 'Avg. Likes', 'Total Likes', 'Combined_Score']])
 
-##########################################
+    ###########################
+    # Top 10 by Followers, Avg. Likes, and Total Likes
+    st.subheader("Top 10 Influencers by Followers, Avg. Likes, and Total Likes")
 
-# Normalize the values
-df['Followers_Norm'] = df['Followers'] / df['Followers'].max()
-df['Avg_Likes_Norm'] = df['Avg. Likes'] / df['Avg. Likes'].max()
-df['Total_Likes_Norm'] = df['Total Likes'] / df['Total Likes'].max()
+    top_followers = df.nlargest(10, 'Followers')
+    top_avg_likes = df.nlargest(10, 'Avg. Likes')
+    top_total_likes = df.nlargest(10, 'Total Likes')
 
-# Create a combined score (simple average of the normalized features)
-df['Combined_Score'] = (df['Followers_Norm'] + df['Avg_Likes_Norm'] + df['Total_Likes_Norm']) / 3
+    st.write("Top 10 by Followers:")
+    st.dataframe(top_followers[['Channel Info', 'Followers']])
 
-# Get the top 10 influencers based on the combined score
-top_10_influencers = df.nlargest(10, 'Combined_Score')
+    st.write("Top 10 by Average Likes:")
+    st.dataframe(top_avg_likes[['Channel Info', 'Avg. Likes']])
 
-# Display the top 10
-print(top_10_influencers[['Channel Info', 'Followers', 'Avg. Likes', 'Total Likes', 'Combined_Score']])
+    st.write("Top 10 by Total Likes:")
+    st.dataframe(top_total_likes[['Channel Info', 'Total Likes']])
 
-##########################################
+    ##############################################
+    # Feature Relationships
+    st.subheader("Feature Relationships")
 
-# Top 10 by Followers
-top_followers = df.nlargest(10, 'Followers')
+    # Followers vs Total Likes
+    st.write("Followers vs Total Likes")
+    plt.figure(figsize=(10, 5))
+    sns.regplot(x='Followers', y='Total Likes', data=df, scatter_kws={'s':50}, line_kws={'color':'red'})
+    plt.title('Followers vs Total Likes with Regression Line')
+    st.pyplot(plt)
 
-# Top 10 by Average Likes
-top_avg_likes = df.nlargest(10, 'Avg. Likes')
+    # Followers vs Influence Score
+    st.write("Followers vs Influence Score")
+    plt.figure(figsize=(10, 5))
+    sns.regplot(x='Followers', y='Influence Score', data=df, scatter_kws={'s':50}, line_kws={'color':'red'})
+    plt.title('Followers vs Influence Score with Regression Line')
+    st.pyplot(plt)
 
-# Top 10 by Total Likes
-top_total_likes = df.nlargest(10, 'Total Likes')
+    # Posts vs Avg. Likes
+    st.write("Posts vs Avg. Likes")
+    plt.figure(figsize=(10, 5))
+    sns.regplot(x='Posts', y='Avg. Likes', data=df, scatter_kws={'s':50}, line_kws={'color':'red'})
+    plt.title('Posts vs Avg. Likes with Regression Line')
+    st.pyplot(plt)
 
-print("Top 10 by Followers:\n", top_followers)
-print("Top 10 by Average Likes:\n", top_avg_likes)
-print("Top 10 by Total Likes:\n", top_total_likes)
-
-##############################################
-
-# Followers vs Total Likes
-plt.scatter(df['Followers'], df['Total Likes'])
-plt.title('Followers vs Total Likes')
-plt.xlabel('Followers')
-plt.ylabel('Total Likes')
-plt.show()
-
-# Followers vs Influence Score
-plt.scatter(df['Followers'], df['Influence Score'])
-plt.title('Followers vs Influence Score')
-plt.xlabel('Followers')
-plt.ylabel('Influence Score')
-plt.show()
-
-# Posts vs Avg. Likes
-plt.scatter(df['Posts'], df['Avg. Likes'])
-plt.title('Posts vs Avg. Likes')
-plt.xlabel('Posts')
-plt.ylabel('Avg. Likes')
-plt.show()
-
-# Posts vs Influence Score
-plt.scatter(df['Posts'], df['Influence Score'])
-plt.title('Posts vs Influence Score')
-plt.xlabel('Posts')
-plt.ylabel('Influence Score')
-plt.show()
-
-#########################################
+    # Posts vs Influence Score
+    st.write("Posts vs Influence Score")
+    plt.figure(figsize=(10, 5))
+    sns.regplot(x='Posts', y='Influence Score', data=df, scatter_kws={'s':50}, line_kws={'color':'red'})
+    plt.title('Posts vs Influence Score with Regression Line')
+    st.pyplot(plt)
