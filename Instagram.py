@@ -95,3 +95,14 @@ plt.show()
 
 ########################################
 
+# Count of influencers per country
+country_counts = df['Country Or Region'].value_counts()
+
+# Plot the bar chart
+country_counts.plot(kind='bar')
+plt.title('Count of Instagram Influencers by Country')
+plt.xlabel('Country')
+plt.ylabel('Count')
+plt.show()
+
+##########################################
