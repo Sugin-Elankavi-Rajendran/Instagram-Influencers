@@ -107,6 +107,22 @@ plt.show()
 
 ##########################################
 
+# Normalize the values
+df['Followers_Norm'] = df['Followers'] / df['Followers'].max()
+df['Avg_Likes_Norm'] = df['Avg. Likes'] / df['Avg. Likes'].max()
+df['Total_Likes_Norm'] = df['Total Likes'] / df['Total Likes'].max()
+
+# Create a combined score (simple average of the normalized features)
+df['Combined_Score'] = (df['Followers_Norm'] + df['Avg_Likes_Norm'] + df['Total_Likes_Norm']) / 3
+
+# Get the top 10 influencers based on the combined score
+top_10_influencers = df.nlargest(10, 'Combined_Score')
+
+# Display the top 10
+print(top_10_influencers[['Channel Info', 'Followers', 'Avg. Likes', 'Total Likes', 'Combined_Score']])
+
+##########################################
+
 # Top 10 by Followers
 top_followers = df.nlargest(10, 'Followers')
 
